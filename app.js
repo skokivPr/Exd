@@ -992,137 +992,348 @@ function showPrinterSelectionDialog(t, printers) {
     });
 }
 
-// Enhanced print function with auto printer detection using native JavaScript
-async function printTable(t) {
-    const vehiclesVisible = document.querySelectorAll('#dataTable tbody tr').length;
+// Enhanced print function with simplified approach and improved styling
+function printTable(t) {
+    const tractorCount = document.querySelectorAll('#dataTable tbody tr').length;
+    const totalCount = tractorCount; // Using unified table view
 
-    if (vehiclesVisible === 0) {
-        alert(`${t('noDataToPrint')}\n\n${t('noDataMessage')}`);
+    // Don't print if no data
+    if (totalCount === 0) {
+        Swal.show({
+            title: t('noDataToPrint'),
+            text: t('noDataMessage'),
+            icon: 'info',
+            confirmButtonColor: '#3b82f6',
+            confirmButtonText: t('ok')
+        });
         return;
     }
 
-    // Show loading while detecting printers with cancellation support
-    let detectionCancelled = false;
+    const printBtn = document.getElementById('printBtn');
 
-    const loadingDialog = createLoadingDialog(
-        `<i class="bi bi-search"></i> ${t('printerDetection')}`,
-        t('printerDetectionText'),
-        () => {
-            detectionCancelled = true;
-        }
-    );
-
-    try {
-        // Detect available printers (quick operation)
-        const printers = await detectAvailablePrinters();
-
-        // Close loading dialog
-        loadingDialog.close();
-
-        // Check if user cancelled during detection
-        if (detectionCancelled) {
-            return; // User cancelled detection
-        }
-
-        // Show printer selection dialog
-        const selectedPrinter = await showPrinterSelectionDialog(t, printers);
-
-        if (!selectedPrinter) {
-            return; // User cancelled printer selection
-        }
-
-        // Show quick success notification
-        const successNotification = document.createElement('div');
-        successNotification.className = 'success-notification';
-        successNotification.innerHTML = `
-            <div class="title">⚡ ${t('printStarted')}</div>
-            <div class="subtitle">${t('printInProgress')}</div>
-        `;
-
-        document.body.appendChild(successNotification);
-
-        // Auto-remove notification after 3 seconds
-        setTimeout(() => {
-            if (document.body.contains(successNotification)) {
-                successNotification.style.animation = 'slideIn 0.3s ease-out reverse';
-                setTimeout(() => {
-                    if (document.body.contains(successNotification)) {
-                        document.body.removeChild(successNotification);
-                    }
-                }, 300);
-            }
-        }, 3000);
-
-        // Continue with existing print logic
-        const printWindow = window.open('', '_blank');
-        const tableHeaders = `
-            <thead>
-                <tr>
-                    <th>${t('location')}</th><th>${t('type')}</th><th>${t('timeInYard')}</th>
-                    <th>${t('vehicleId')}</th><th>${t('notes')}</th>
-                </tr>
-            </thead>`;
-
-        const getTableRows = (tableId) => Array.from(document.querySelectorAll(`#${tableId} tbody tr`))
-            .map(row => `<tr>${Array.from(row.cells).map(cell => `<td>${cell.textContent}</td>`).join('')}</tr>`).join('');
-
-        const content = `
-        <html>
-            <head>
-                <title>Vehicle List - ${new Date().toLocaleString()}</title>
-                <link rel="stylesheet" href="index.css">
-            </head>
-            <body class="print-document">
-                <h1 class="print-title">Vehicle Report</h1>
-                <h2 class="print-subtitle">${t('allVehicles')}</h2>
-                <table class="print-table">${tableHeaders}<tbody>${getTableRows('dataTable')}</tbody></table>
-                
-                <div class="print-summary-box">
-                    <h3><i class="bi bi-bar-chart"></i> ${t('summaryHeader')}</h3>
-                    <div class="print-summary-grid">
-                        <div class="print-summary-item">
-                            <strong><i class="bi bi-truck"></i> ${t('tractorVehicles')}</strong><br>
-                            <span class="print-summary-number">${allTractors.length}</span>
-                        </div>
-                        <div class="print-summary-item">
-                            <strong><i class="bi bi-truck-front"></i> ${t('boxTruckVehicles')}</strong><br>
-                            <span class="print-summary-number">${allBoxTrucks.length}</span>
-                        </div>
-                        <div class="print-summary-item">
-                            <strong><i class="bi bi-graph-up"></i> ${t('totalSummary')}</strong><br>
-                            <span class="print-summary-number print-summary-total">${allTractors.length + allBoxTrucks.length}</span>
-                        </div>
-                    </div>
-                    <p class="print-date">
-                        ${t('printDate')}: ${new Date().toLocaleString()}
-                    </p>
-                </div>
-            </body>
-        </html>`;
-
-        printWindow.document.write(content);
-        printWindow.document.close();
-
-        setTimeout(() => {
-            Swal.close(); // Close loading dialog
-            printWindow.print();
-            printWindow.close();
-        }, 250);
-
-    } catch (error) {
-        console.error('Print error:', error);
-
-        // Close any open dialogs
-        const openDialogs = document.querySelectorAll('.printer-dialog-overlay');
-        openDialogs.forEach(dialog => {
-            if (document.body.contains(dialog)) {
-                document.body.removeChild(dialog);
-            }
-        });
-
-        // Show error notification
-        alert(`❌ ${t('printError')}\n\n${t('printErrorText')}`);
+    // Set loading state
+    if (printBtn) {
+        printBtn.disabled = true;
+        printBtn.classList.add('loading');
     }
+
+    // Show loading notification
+    Swal.show({
+        title: `⚡ ${t('printStarted')}`,
+        text: t('printInProgress'),
+        timer: 1500,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        icon: 'success'
+    });
+
+    const printWindow = window.open('', '_blank');
+
+    // A4-optimized print styles
+    const style = `
+        <style>
+        @media print {
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 0.2cm;
+                font-size: 9pt;
+                line-height: 1.2;
+                background: #ffffff !important;
+                color: #000000 !important;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .print-header {
+                text-align: center;
+                margin-bottom: 0.15rem;
+                border-bottom: 1px solid #3498db;
+                padding-bottom: 0.1rem;
+                flex-shrink: 0;
+            }
+            
+            .print-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #2c3e50 !important;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+                margin: 0;
+            }
+            
+            .print-subtitle {
+                font-size: 1rem;
+                color: #7f8c8d !important;
+                font-weight: 500;
+                margin: 0.1rem 0 0 0;
+            }
+            
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 0.1rem 0;
+                font-size: 1rem;
+                table-layout: fixed;
+                flex-grow: 1;
+            }
+            
+            /* Optymalne szerokości kolumn dla A4 landscape */
+            th:nth-child(1), td:nth-child(1) { width: 18%; } /* Location */
+            th:nth-child(2), td:nth-child(2) { width: 12%; } /* Type */
+            th:nth-child(3), td:nth-child(3) { width: 15%; } /* Time in Yard */
+            th:nth-child(4), td:nth-child(4) { width: 20%; } /* Vehicle ID */
+            th:nth-child(5), td:nth-child(5) { width: 35%; } /* Notes */
+            
+            th {
+                background-color: #34495e !important;
+                color: #ffffff !important;
+                font-weight: 700;
+                font-size: 1rem;
+                padding: 3px 4px;
+                text-align: center;
+                text-transform: uppercase;
+                letter-spacing: 0.2px;
+                border: 0.5px solid #2c3e50 !important;
+            }
+            
+            td {
+                padding: 3px 4px;
+                text-align: left;
+                font-size: 0.7rem;
+                line-height: 1.2;
+                word-wrap: break-word;
+                vertical-align: middle;
+                color: #000000 !important;
+                border: 0.5px solid #dee2e6 !important;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            tr:nth-child(even) {
+                background-color: #f8f9fa !important;
+            }
+            
+            /* Kolorowe obramowania kolumn - cieńsze dla A4 */
+            td:nth-child(1) { /* Location */
+                font-weight: 600;
+                border-left: 1px solid #e74c3c !important;
+                text-align: left;
+                padding-left: 6px;
+            }
+            
+            td:nth-child(2) { /* Type */
+                font-weight: 600;
+                border-left: 1px solid #27ae60 !important;
+                text-align: left;
+                padding-left: 6px;
+            }
+            
+            td:nth-child(3) { /* Time in Yard */
+                font-weight: 600;
+                border-left: 1px solid #f39c12 !important;
+                text-align: left;
+                padding-left: 6px;
+            }
+            
+            td:nth-child(4) { /* Vehicle ID */
+                font-weight: 700;
+                font-family: 'Courier New', monospace;
+                border-left: 1px solid #3498db !important;
+                text-align: left;
+                padding-left: 6px;
+            }
+            
+            td:nth-child(5) { /* Notes */
+                color: #333333 !important;
+                border-left: 1px solid #95a5a6 !important;
+                background-color: rgba(149, 165, 166, 0.02) !important;
+                font-size: 0.65rem;
+                text-align: left;
+                padding-left: 6px;
+            }
+            
+            .print-summary {
+                margin-top: 0.1rem;
+                padding: 0.2rem;
+                border: 0.5px solid #dee2e6 !important;
+                background-color: #f8f9fa !important;
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                flex-shrink: 0;
+            }
+            
+            .summary-item {
+                text-align: center;
+                padding: 0.15rem;
+                background-color: #ffffff !important;
+                border: 0.5px solid #ecf0f1 !important;
+                flex: 1;
+                margin: 0 0.1rem;
+            }
+            
+            .summary-label {
+                font-size: 0.55rem;
+                color: #7f8c8d !important;
+                text-transform: uppercase;
+                font-weight: 600;
+                margin-bottom: 0.05rem;
+                display: block;
+            }
+            
+            .summary-number {
+                font-size: 0.85rem;
+                font-weight: 700;
+                color: #2c3e50 !important;
+            }
+            
+            .summary-total {
+                color: #e74c3c !important;
+                font-size: 0.95rem;
+            }
+            
+            .print-footer {
+                text-align: center;
+                margin-top: 0.1rem;
+                font-size: 0.4rem;
+                color: #95a5a6 !important;
+                border-top: 0.5px solid #dee2e6 !important;
+                padding-top: 0.1rem;
+                flex-shrink: 0;
+            }
+            
+            @page {
+                size: A4 landscape;
+                margin: 0.1cm;
+            }
+            
+            /* Zapobieganie łamaniu strony */
+            table, .print-summary, .print-header {
+                page-break-inside: avoid;
+            }
+            
+            /* Maksymalne wykorzystanie przestrzeni A4 */
+            html, body {
+                width: 100%;
+                height: 100vh;
+                margin: 0;
+                padding: 0;
+            }
+            
+            /* Zwiększenie gęstości danych */
+            tbody tr {
+                height: auto;
+                min-height: 1.1rem;
+            }
+            
+            /* Lepsze wyrównanie tekstu */
+            td {
+                white-space: nowrap;
+            }
+            
+            /* Specjalne wyrównanie dla kolumny Notes */
+            td:nth-child(5) {
+                white-space: normal;
+                word-break: break-word;
+                hyphens: auto;
+            }
+            
+            /* Kompaktowe wyświetlanie dla maksymalnej ilości wierszy */
+            .table-container {
+                height: calc(100vh - 3rem);
+                overflow: visible;
+            }
+            
+            /* Optymalizacja dla dużej ilości danych */
+            @media print {
+                tbody tr {
+                    break-inside: avoid;
+                }
+                
+                /* Zmniejszenie odstępów między wierszami */
+                tr {
+                    margin: 0;
+                    padding: 0;
+                }
+            }
+        }
+        </style>
+    `;
+
+    const content = `
+        <html>
+        <head>
+            <title>Vehicle List - ${new Date().toLocaleString()}</title>
+            <meta charset="UTF-8">
+            ${style}
+        </head>
+        <body>
+            <div class="print-header">
+                <h1 class="print-title">Vehicle Report</h1>
+                <h2 class="print-subtitle">${t('allVehicles')} - Total: ${totalCount}</h2>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>${t('location')}</th>
+                        <th>${t('type')}</th>
+                        <th>${t('timeInYard')}</th>
+                        <th>${t('vehicleId')}</th>
+                        <th>${t('notes')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${Array.from(document.querySelectorAll('#dataTable tbody tr'))
+            .map(row => `<tr>${Array.from(row.cells).map(cell => `<td>${cell.textContent}</td>`).join('')}</tr>`)
+            .join('')}
+                </tbody>
+            </table>
+            
+            <div class="print-summary">
+                <div class="summary-item">
+                    <span class="summary-label">${t('tractorsSummary')}</span>
+                    <span class="summary-number">${allTractors.length}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">${t('boxtrucksSummary')}</span>
+                    <span class="summary-number">${allBoxTrucks.length}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">${t('totalSummary')}</span>
+                    <span class="summary-number summary-total">${allTractors.length + allBoxTrucks.length}</span>
+                </div>
+            </div>
+            
+            <div class="print-footer">
+                ${t('printDate')}: ${new Date().toLocaleString()} | ${t('systemVersion')}
+            </div>
+        </body>
+        </html>
+    `;
+
+    printWindow.document.write(content);
+    printWindow.document.close();
+
+    // Auto-print after content loads
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+
+        // Reset button state
+        if (printBtn) {
+            printBtn.disabled = false;
+            printBtn.classList.remove('loading');
+        }
+    }, 500);
 }
 
 // Quick print function (bypasses printer selection dialog)
