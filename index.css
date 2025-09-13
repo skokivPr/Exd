@@ -1,0 +1,1975 @@
+:root {
+    --bg: #f8f9fa;
+    --panel-bg: #ffffff;
+    --text-color: #212529;
+    --text-muted: #6c757d;
+    --highlight-color: #ff7300;
+    --border-color: #dee2e6;
+    --card-bg: #f1f3f5;
+    --status-sealed-color: #28a745;
+    --status-unsealed-color: #dc3545;
+    --status-blue-color: #007bff;
+    --status-blue-color-rgb: 0, 123, 255;
+    --font-family: "JetBrains Mono", monaco, courier;
+    --border-radius: 0;
+    --spacing-unit: 0.2rem;
+    --transition-speed: 0.2s;
+
+    --bg-rgb: 248, 249, 250;
+    --panel-bg-rgb: 255, 255, 255;
+    --text-color-rgb: 33, 37, 41;
+    --text-muted-rgb: 108, 117, 125;
+    --highlight-color-rgb: 255, 115, 0;
+    --border-color-rgb: 222, 226, 230;
+    --card-bg-rgb: 241, 243, 245;
+    --status-sealed-color-rgb: 40, 167, 69;
+    --status-unsealed-color-rgb: 220, 53, 69;
+}
+
+:root[theme="dark"] {
+    --bg: #1a1a1a;
+    --panel-bg: #242424;
+    --text-color: #e9ecef;
+    --text-muted: #8d8d8d;
+    --highlight-color: #ff8c33;
+    --border-color: #3a3a3a;
+    --card-bg: #2c2c2c;
+    --status-sealed-color: #20c997;
+    --status-unsealed-color: #ff3131;
+    --status-blue-color: #007bff;
+    --status-blue-color-rgb: 0, 123, 255;
+
+    --bg-rgb: 30, 30, 30;
+    --panel-bg-rgb: 32, 32, 32;
+    --text-color-rgb: 233, 236, 239;
+    --text-muted-rgb: 141, 141, 141;
+    --highlight-color-rgb: 255, 140, 51;
+    --border-color-rgb: 58, 58, 58;
+    --card-bg-rgb: 44, 44, 44;
+    --status-sealed-color-rgb: 32, 201, 151;
+    --status-unsealed-color-rgb: 255, 49, 49;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-family);
+}
+
+body {
+    background: var(--panel-bg);
+    color: var(--text-color);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+}
+
+.command-center-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    grid-template-rows: 1fr;
+    gap: calc(var(--spacing-unit) * 1.5);
+    width: 100%;
+    height: 100%;
+    padding: calc(var(--spacing-unit) * 1.5);
+}
+
+.panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.panel-controls {
+    grid-row: 1 / 4;
+}
+
+.panel-header {
+    padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit);
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--highlight-color);
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-unit);
+}
+
+.panel-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0.2rem;
+    height: 100%;
+}
+
+.panel-main {
+    grid-column: 2 / 3;
+    grid-row: 1 / 4;
+}
+
+.panel-main .panel-content {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.bi {
+    font-size: 1.5rem;
+    text-shadow: 0 0.5px 2px;
+    margin-right: 0.5rem;
+}
+
+/* Upload Section */
+#upload-section label {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-unit);
+    height: 300px;
+    border: 2px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    color: var(--status-sealed-color);
+    text-shadow: 0 0.5px 1px;
+    text-align: center;
+    padding: 1rem;
+}
+
+#upload-section.drop-zone-active label,
+#upload-section label:hover {
+    border-color: rgb(var(--highlight-color-rgb), 0.5);
+    background: var(--card-bg);
+    color: rgb(var(--highlight-color-rgb), 1);
+}
+
+#file-name {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+}
+
+#file-name.no-file-blink {
+    animation: redBlink 2.5s infinite;
+    color: rgb(var(--status-unsealed-color-rgb), 0.8);
+}
+
+@keyframes redBlink {
+    0%, 50% {
+        color: rgb(var(--status-unsealed-color-rgb), 0.8);
+        opacity: 1;
+    }
+
+    25%, 75% {
+        color: rgb(var(--status-unsealed-color-rgb), 0.4);
+        opacity: 0.6;
+    }
+}
+
+/* Filters & Search */
+.filters-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-unit);
+}
+
+/* AI Search Panel */
+#aiSearchInput {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: var(--spacing-unit);
+    font-size: 0.9rem;
+    border-radius: var(--border-radius);
+    resize: vertical;
+    transition: all var(--transition-speed);
+    font-family: var(--font-family);
+}
+
+#aiSearchInput:focus {
+    outline: none;
+    border-color: rgb(var(--highlight-color-rgb), 0.5);
+    box-shadow: 0 0 0 2px rgba(var(--highlight-color-rgb), 0.2);
+}
+
+
+/* Summary Panel */
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-unit);
+}
+
+.info-card {
+    background: rgb(var(--card-bg-rgb), 0.3);
+    border: 1px solid rgb(var(--border-color-rgb), 0.5);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-unit);
+    text-align: center;
+}
+
+.info-card-title {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.info-card-value {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--highlight-color);
+}
+
+/* Table */
+.table-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    position: relative;
+    padding: var(--spacing-unit);
+}
+
+.placeholder-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-muted);
+    font-size: 1rem;
+    text-align: center;
+    padding: 0.1rem;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    table-layout: fixed;
+}
+
+/* Column width optimization */
+.data-table th:nth-child(1),
+.data-table td:nth-child(1) {
+    width: 15%;
+    /* Location */
+}
+
+.data-table th:nth-child(2),
+.data-table td:nth-child(2) {
+    width: 12%;
+    /* Type */
+}
+
+.data-table th:nth-child(3),
+.data-table td:nth-child(3) {
+    width: 18%;
+    /* Time in Yard */
+}
+
+.data-table th:nth-child(4),
+.data-table td:nth-child(4) {
+    width: 20%;
+    /* Vehicle ID */
+}
+
+.data-table th:nth-child(5),
+.data-table td:nth-child(5) {
+    width: 35%;
+    /* Notes */
+}
+
+.data-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+
+.data-table th {
+    background: var(--panel-bg);
+    border-bottom: 2px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.75rem;
+    text-align: left;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    transition: color var(--transition-speed);
+    position: relative;
+}
+
+.data-table th:hover {
+    color: var(--text-color);
+}
+
+.data-table td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color var(--transition-speed);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+
+.data-table tbody tr:hover {
+    opacity: 1;
+    background: var(--card-bg);
+    color: var(--text-color);
+}
+
+/* Vehicle type color coding */
+.vehicle-type-boxtruck {
+    background-color: transparent !important;
+    color: rgb(var(--status-blue-color-rgb), 0.5);
+    font-weight: bold;
+    position: relative;
+}
+
+.vehicle-type-tractor {
+    background-color: transparent !important;
+    color: rgb(var(--status-sealed-color-rgb), 0.5);
+    font-weight: bold;
+    position: relative;
+}
+
+/* Add icons to vehicle types */
+.vehicle-type-boxtruck::before {
+    content: "🚚 ";
+    margin-right: 4px;
+}
+
+.vehicle-type-tractor::before {
+    content: "🚛 ";
+    margin-right: 4px;
+}
+
+/* Row highlighting for better visibility */
+.row-boxtruck {
+    border-left: 5px solid rgb(var(--status-sealed-color-rgb), 0.5);
+}
+
+.row-tractor {
+    border-left: 5px solid rgb(var(--status-blue-color-rgb), 0.5);
+}
+
+/* Dark theme adjustments */
+:root[theme="dark"] .vehicle-type-boxtruck {
+    background-color: transparent !important;
+    color: rgb(var(--status-blue-color-rgb), 1);
+}
+
+:root[theme="dark"] .vehicle-type-tractor {
+    background-color: transparent !important;
+    color: rgb(var(--status-sealed-color-rgb), 1);
+}
+
+.sort-indicator {
+    opacity: 0.3;
+    transition: all var(--transition-speed);
+    margin-left: 0.25rem;
+}
+
+th:hover .sort-indicator {
+    opacity: 0.7;
+}
+
+th.sorted-asc .sort-indicator,
+th.sorted-desc .sort-indicator {
+    opacity: 1;
+    color: var(--highlight-color);
+}
+
+
+.hidden {
+    display: none !important;
+}
+
+/* Global Nav Controls */
+.global-nav-controls {
+    padding: calc(var(--spacing-unit) * 0.5);
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-unit);
+    background-color: var(--panel-bg);
+}
+
+/* Print media query - single column for printing */
+@media print {
+    .global-nav-controls {
+        display: flex !important;
+        flex-direction: column !important;
+        grid-template-columns: none !important;
+    }
+}
+
+.nav-btn {
+    background: rgb(var(--card-bg-rgb), 0.1);
+    color: var(--text-muted);
+    border: 1px solid rgb(var(--border-color-rgb), 0.5);
+    padding: calc(var(--spacing-unit) * 1.5);
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: var(--border-radius);
+    transition: all var(--transition-speed);
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: var(--spacing-unit);
+    text-align: center;
+    font-size: 0.85rem;
+    min-height: 44px;
+    /* Touch-friendly minimum */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0.5rem 1rem;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background: rgb(var(--highlight-color-rgb), 0.2);
+    border-color: rgb(var(--highlight-color-rgb), 0.5);
+    color: var(--text-color);
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.nav-btn.danger {
+    border-color: rgb(var(--status-unsealed-color-rgb), 0.5);
+    color: var(--status-unsealed-color);
+}
+
+.nav-btn.danger:hover:not(:disabled) {
+    background: rgb(var(--status-unsealed-color-rgb), 0.2);
+    border-color: rgb(var(--status-unsealed-color-rgb), 0.5);
+    color: rgb(var(--status-unsealed-color-rgb), 1);
+}
+
+.nav-btn.primary {
+    background: rgb(var(--highlight-color-rgb), 0.1);
+    border-color: rgb(var(--highlight-color-rgb), 0.5);
+    color: rgb(var(--highlight-color-rgb), 1);
+    font-weight: bold;
+}
+
+.nav-btn.primary:hover:not(:disabled) {
+    background: rgb(var(--highlight-color-rgb), 0.2);
+    border-color: rgb(var(--highlight-color-rgb), 0.5);
+}
+
+.nav-btn.success {
+    background: rgb(var(--status-sealed-color-rgb), 0.1);
+    border-color: rgb(var(--status-sealed-color-rgb), 0.5);
+    color: rgb(var(--status-sealed-color-rgb), 1);
+    font-weight: bold;
+}
+
+.nav-btn.success:hover:not(:disabled) {
+    background: rgb(var(--status-sealed-color-rgb), 0.2);
+    border-color: rgb(var(--status-sealed-color-rgb), 0.5);
+}
+
+
+/* Unified vehicles view */
+#unified-vehicles-view {
+    background-image:
+        url('https://raw.githubusercontent.com/skokivPr/img/refs/heads/main/t1.png'),
+        url('https://raw.githubusercontent.com/skokivPr/img/refs/heads/main/b1.png');
+    background-size: 30%, 30%;
+    background-position: 25% center, 75% center;
+    background-repeat: no-repeat, no-repeat;
+    background-attachment: fixed;
+    position: relative;
+}
+
+/* Add overlay for better readability */
+#unified-vehicles-view::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Ensure content is above overlay */
+#unified-vehicles-view .table-wrapper {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.85);
+    margin: 8px;
+    border-radius: var(--border-radius);
+    backdrop-filter: blur(2px);
+}
+
+/* Dark theme adjustments */
+:root[theme="dark"] #unified-vehicles-view .table-wrapper {
+    background: rgba(36, 36, 36, 0.85);
+    backdrop-filter: blur(2px);
+}
+
+/* QR Code Section */
+.qr-code-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-unit);
+}
+
+.qr-code-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-unit);
+    padding: calc(var(--spacing-unit) * 1.5);
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+#qrCodeCanvas {
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: rgb(var(--status-unsealed-color-rgb), 1);
+    max-width: 100%;
+    height: auto;
+}
+
+.qr-code-description {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: center;
+    margin: 0;
+    font-style: italic;
+}
+
+#generateQrBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    text-align: center;
+    transition: all var(--transition-speed);
+}
+
+
+
+#generateQrBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* QR Button text highlight when CSV is loaded */
+#generateQrBtn.highlight span {
+    color: var(--highlight-color) !important;
+    font-weight: bold;
+    animation: qr-text-pulse 2s ease-in-out infinite;
+    text-shadow: 0 0 8px rgba(255, 115, 0, 0.3);
+}
+
+@keyframes qr-text-pulse {
+    0%, 100% {
+        color: var(--highlight-color) !important;
+        text-shadow: 0 0 8px rgba(255, 115, 0, 0.3);
+    }
+
+    50% {
+        color: #ff9933 !important;
+        text-shadow: 0 0 12px rgba(255, 115, 0, 0.5);
+    }
+}
+
+/* QR Code Modal Styles */
+.qr-modal-popup {
+    background: var(--panel-bg) !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: var(--border-radius) !important;
+}
+
+.qr-modal-popup .swal2-title {
+    color: var(--text-primary) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+.qr-modal-popup .swal2-html-container {
+    color: var(--text-primary) !important;
+}
+
+/* Mobile QR Code Styles */
+.qr-selection-popup {
+    background: var(--panel-bg) !important;
+    border: 2px solid var(--border-color) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+}
+
+
+/* Mobile QR Responsive Adjustments */
+@media (max-width: 768px) {
+    .qr-selection-popup {
+        width: 95% !important;
+        margin: 1rem !important;
+        max-width: none !important;
+    }
+
+    .qr-mobile-popup {
+        width: 95% !important;
+        margin: 1rem !important;
+        max-width: none !important;
+        padding: 1rem !important;
+    }
+
+    .qr-mobile-popup .modal-title {
+        font-size: 1rem !important;
+    }
+
+    .qr-mobile-popup .modal-body {
+        font-size: 0.9rem !important;
+        padding: 0.5rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .qr-selection-popup,
+    .qr-mobile-popup {
+        width: 98% !important;
+        margin: 0.5rem !important;
+    }
+
+    .qr-mobile-popup {
+        max-height: 98vh !important;
+        padding: 0.8rem !important;
+    }
+}
+
+/* QR Code Display Optimizations */
+@media (max-width: 768px) {
+    .qr-code-display {
+        max-width: 90vw !important;
+        max-height: 90vw !important;
+    }
+}
+
+/* Touch-friendly buttons for mobile QR */
+@media (max-width: 768px) {
+    .qr-action-button {
+        min-height: 48px !important;
+        font-size: 1rem !important;
+        padding: 1rem !important;
+        touch-action: manipulation !important;
+    }
+}
+
+/* System Version Footer */
+.system-version {
+    margin-top: auto;
+    padding: calc(var(--spacing-unit) * 1.5) var(--spacing-unit);
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.system-version:hover {
+    color: var(--highlight-color);
+    transition: color var(--transition-speed);
+}
+
+/* Custom Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background: var(--panel-bg);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transform: scale(0.95) translateY(-20px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.modal-overlay.show .modal {
+    transform: scale(1) translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    gap: var(--spacing-unit);
+}
+
+.modal-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-color);
+    margin: 0;
+    text-align: center;
+    transform: translateZ(0);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.modal-icon {
+    font-size: 2rem;
+    margin-right: var(--spacing-unit);
+}
+
+.modal-icon.success {
+    color: var(--status-sealed-color);
+}
+
+.modal-icon.error {
+    color: var(--status-unsealed-color);
+}
+
+.modal-icon.warning {
+    color: #ffc107;
+    text-shadow: 0 1px 2px;
+}
+
+.modal-icon.info {
+    color: #17a2b8;
+}
+
+.modal-body {
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+    text-align: center;
+    will-change: auto;
+    transform: translateZ(0);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.modal-body p {
+    margin: 0 0 1rem 0;
+}
+
+.modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+.modal-actions {
+    display: flex;
+    gap: var(--spacing-unit);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-btn {
+    padding: calc(var(--spacing-unit) * 1.5);
+    border: none;
+    border-radius: var(--border-radius);
+    font-family: var(--font-family);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+    min-width: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+}
+
+.modal-btn.primary {
+    background: rgb(var(--highlight-color-rgb), 0.1);
+    color: rgb(var(--highlight-color-rgb), 1);
+}
+
+.modal-btn.primary:hover {
+    background: rgb(var(--highlight-color-rgb), 0.2);
+    border-color: rgb(var(--highlight-color-rgb), 0.5);
+}
+
+.modal-btn.secondary {
+    background: rgb(var(--highlight-color-rgb), 0.1);
+    color: var(--highlight-color);
+    border: 1px solid transparent;
+}
+
+.modal-btn.secondary:hover {
+    background: rgb(var(--highlight-color-rgb), 0.2);
+    border-color: rgb(var(--highlight-color-rgb), 0.5);
+}
+
+.modal-btn.danger {
+    background: rgb(var(--status-unsealed-color-rgb), 0.1);
+    color: var(--status-unsealed-color);
+    border: 1px solid transparent;
+}
+
+.modal-btn.danger:hover {
+    background: rgb(var(--status-unsealed-color-rgb), 0.2);
+    border-color: rgb(var(--status-unsealed-color-rgb), 0.5);
+}
+
+.modal-btn.success {
+    background: rgb(var(--status-sealed-color-rgb), 0.1);
+    color: var(--status-sealed-color);
+    border: 1px solid rgb(var(--status-sealed-color-rgb), 0.5);
+}
+
+.modal-btn.success:hover {
+    background: rgb(var(--status-sealed-color-rgb), 0.2);
+    border-color: rgb(var(--status-sealed-color-rgb), 0.5);
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: rgb(var(--text-muted-rgb), 0.5);
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+    transition: all var(--transition-speed);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--border-radius);
+}
+
+.modal-close:hover {
+    color: rgb(var(--status-unsealed-color-rgb), 1);
+    background: rgb(var(--status-unsealed-color-rgb), 0.1);
+}
+
+.modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.modal-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgb(var(--border-color-rgb), 0.5);
+    border-top: 4px solid rgb(var(--highlight-color-rgb), 0.5);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.modal-progress {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.modal-progress-bar {
+    height: 100%;
+    background: var(--highlight-color);
+    transition: width 0.3s ease;
+    animation: progress-indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-indeterminate {
+    0% {
+        width: 0%;
+        margin-left: 0%;
+    }
+
+    50% {
+        width: 75%;
+        margin-left: 25%;
+    }
+
+    100% {
+        width: 0%;
+        margin-left: 100%;
+    }
+}
+
+/* Large modal for info content */
+.modal.large {
+    max-width: 600px;
+}
+
+.modal.large .modal-body {
+    text-align: left;
+}
+
+.modal.large .modal-body h3 {
+    color: var(--highlight-color);
+    margin: 1rem 0 0.5rem 0;
+}
+
+.modal.large .modal-body ul {
+    padding-left: 1.2rem;
+    margin: 0 0 1rem 0;
+}
+
+.modal.large .modal-body li {
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive Design */
+/* Mobile-first responsive design */
+@media (max-width: 768px) {
+    body {
+        font-size: 12px;
+        overflow: auto;
+        height: auto;
+    }
+
+    .command-center-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        gap: var(--spacing-unit);
+        padding: var(--spacing-unit);
+        height: auto;
+    }
+
+    .panel-controls,
+    .panel-main {
+        grid-row: auto;
+        grid-column: auto;
+    }
+
+    .panel-header {
+        padding: var(--spacing-unit);
+        font-size: 0.8rem;
+    }
+
+    .panel-content {
+        padding: calc(var(--spacing-unit) * 0.75);
+    }
+
+    .global-nav-controls {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    .nav-btn {
+        padding: 0.5rem;
+        font-size: 0.7rem;
+        gap: 0.3rem;
+        min-height: 44px;
+        /* Touch-friendly minimum */
+    }
+
+    .nav-btn i {
+        font-size: 1rem;
+        text-shadow: 0 1px 2px;
+        margin-right: 0.5rem;
+    }
+
+    .nav-btn span {
+        display: none;
+        /* Hide text on mobile to save space */
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .info-card {
+        grid-column: auto !important;
+    }
+
+    .modal {
+        max-width: 95%;
+        margin: 1rem;
+        padding: 1rem;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-title {
+        font-size: 1rem;
+    }
+
+    .modal-body {
+        font-size: 0.85rem;
+        padding: 0.5rem 0;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .modal-btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    /* Upload section mobile optimization */
+    #upload-section label {
+        height: 200px;
+        gap: 0.5rem;
+    }
+
+    #upload-section .bi {
+        font-size: 1.5rem;
+    }
+
+    /* Table responsive adjustments */
+    .table-container {
+        font-size: 0.75rem;
+    }
+
+    .vehicle-table th,
+    .vehicle-table td {
+        padding: 0.4rem 0.2rem;
+        min-width: 80px;
+    }
+
+    /* QR Code mobile adjustments */
+    .qr-code-display {
+        max-width: 80vw !important;
+        max-height: 80vw !important;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .command-center-grid {
+        padding: 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .panel-header {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .panel-content {
+        padding: 0.5rem;
+    }
+
+    .global-nav-controls {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .nav-btn {
+        padding: 0.4rem;
+        font-size: 0.65rem;
+    }
+
+    .nav-btn i {
+        font-size: 0.9rem;
+    }
+
+    .modal {
+        margin: 0.5rem;
+        padding: 0.75rem;
+    }
+
+    .modal-title {
+        font-size: 0.9rem;
+    }
+
+    .modal-body {
+        font-size: 0.8rem;
+    }
+
+    /* Upload section for very small screens */
+    #upload-section label {
+        height: 150px;
+    }
+
+    /* Table adjustments for small screens */
+    .vehicle-table {
+        font-size: 0.7rem;
+    }
+
+    .vehicle-table th,
+    .vehicle-table td {
+        padding: 0.3rem 0.1rem;
+        min-width: 60px;
+    }
+
+    /* Hide less important columns on very small screens */
+    .vehicle-table .hide-mobile {
+        display: none;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-width: 768px) and (orientation: landscape) {
+    .command-center-grid {
+        grid-template-columns: 300px 1fr;
+        grid-template-rows: 1fr;
+    }
+
+    .panel-controls {
+        grid-row: 1;
+        grid-column: 1;
+    }
+
+    .panel-main {
+        grid-row: 1;
+        grid-column: 2;
+    }
+
+    .nav-btn span {
+        display: inline;
+        /* Show text in landscape */
+    }
+
+    .global-nav-controls {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Large tablets and small desktops */
+@media (max-width: 1200px) {
+    body {
+        overflow: auto;
+        height: auto;
+    }
+
+    .command-center-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        height: auto;
+        gap: var(--spacing-unit);
+        padding: var(--spacing-unit);
+    }
+
+    .panel-controls,
+    .panel-main {
+        grid-row: auto;
+        grid-column: auto;
+    }
+
+    .panel-controls {
+        min-height: 400px;
+    }
+
+    .panel-main {
+        min-height: 500px;
+    }
+
+    .global-nav-controls {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .nav-btn {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+        gap: 0.4rem;
+        min-height: 44px;
+    }
+
+    .nav-btn i {
+        font-size: 1.2rem;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .info-card {
+        padding: 0.75rem;
+    }
+
+    .modal {
+        max-width: 95%;
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .modal-btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .vehicle-table {
+        font-size: 0.8rem;
+    }
+
+    .vehicle-table th,
+    .vehicle-table td {
+        padding: 0.4rem 0.3rem;
+    }
+}
+
+/* Tablets */
+@media (max-width: 768px) {
+    .global-nav-controls {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+    }
+
+    .nav-btn {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+        gap: 0.6rem;
+        min-height: 48px;
+    }
+
+    .nav-btn i {
+        font-size: 1.3rem;
+    }
+
+    .nav-btn span {
+        display: block;
+    }
+}
+
+/* Mobile phones */
+@media (max-width: 480px) {
+    .global-nav-controls {
+        padding: 0.3rem;
+        gap: 0.3rem;
+    }
+
+    .nav-btn {
+        padding: 0.7rem 0.5rem;
+        font-size: 0.75rem;
+        gap: 0.3rem;
+        min-height: 44px;
+        flex-direction: column;
+    }
+
+    .nav-btn i {
+        font-size: 1.1rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .nav-btn span {
+        font-size: 0.7rem;
+        line-height: 1;
+    }
+
+    /* Stack buttons in single column on very small screens */
+    .global-nav-controls {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 360px) {
+    .nav-btn {
+        padding: 0.5rem 0.3rem;
+        font-size: 0.7rem;
+        min-height: 40px;
+    }
+
+    .nav-btn i {
+        font-size: 1rem;
+    }
+
+    .nav-btn span {
+        font-size: 0.65rem;
+    }
+}
+
+/* Printer Dialog Styles */
+.printer-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(3px);
+}
+
+.printer-dialog {
+    background: var(--panel-bg);
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    font-family: var(--font-family);
+    color: var(--text-color);
+}
+
+.printer-dialog.loading {
+    text-align: center;
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.printer-dialog.selection {
+    min-width: 400px;
+    max-width: 500px;
+}
+
+.printer-dialog h3 {
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+}
+
+.printer-dialog label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.printer-dialog select {
+    width: 100%;
+    padding: 0.3rem;
+    border: 1px solid transparent;
+    font-size: 14px;
+    background: var(--panel-bg);
+    margin-bottom: 15px;
+    color: var(--text-color);
+    outline: none;
+    font-family: var(--font-family);
+    margin: 0.5rem 0 1rem 0;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.printer-dialog select:focus {
+    border-bottom: 1px solid var(--highlight-color);
+    color: var(--status-blue-color);
+}
+
+.printer-dialog .hint-box {
+    padding: 12px;
+    background: rgba(var(--highlight-color-rgb), 0.1);
+    border: 1px solid var(--highlight-color);
+    font-size: 13px;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.printer-dialog .button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.printer-dialog .modal-btn {
+    border: none;
+    padding: 12px 24px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    font-family: var(--font-family);
+    border: 1px solid transparent;
+}
+
+.printer-dialog .modal-btn.cancel {
+    background: rgb(var(--status-unsealed-color-rgb), 0.1);
+    color: var(--status-unsealed-color);
+}
+
+.printer-dialog .modal-btn.cancel:hover {
+    background: rgb(var(--status-unsealed-color-rgb), 0.2);
+    color: var(--status-unsealed-color);
+    border-color: rgb(var(--status-unsealed-color-rgb), 0.5);
+}
+
+.printer-dialog .modal-btn.primary {
+    background: rgb(var(--highlight-color-rgb), 0.1);
+    color: var(--highlight-color);
+
+}
+
+.printer-dialog .modal-btn.primary:hover {
+    background: rgb(var(--highlight-color-rgb), 0.2);
+    color: var(--highlight-color);
+    border-color: rgb(var(--highlight-color-rgb), 0.5);
+    transform: translateY(0);
+}
+
+.printer-dialog .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--highlight-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+.printer-dialog .loading-text {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.printer-dialog .loading-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+/* Success Notification */
+.success-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgb(var(--status-sealed-color-rgb), 0.1);
+    color: var(--status-sealed-color);
+    padding: 15px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    font-family: var(--font-family);
+    font-size: 14px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.success-notification .title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+}
+
+.success-notification .subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-top: 4px;
+}
+
+/* Animations */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Info Modal Styles */
+.info-modal-content {
+    font-size: 0.9rem;
+}
+
+.info-modal-list {
+    padding-left: 1.2rem;
+    text-align: left;
+}
+
+.info-modal-list li {
+    margin-bottom: 0.5rem;
+}
+
+.info-modal-heading {
+    color: var(--highlight-color);
+    margin-top: 1rem;
+}
+
+.info-modal-heading:first-child {
+    margin-top: 0;
+}
+
+.info-modal-version {
+    text-align: center;
+    margin-top: 2rem;
+    color: var(--text-muted);
+}
+
+/* QR Modal Styles */
+.qr-modal-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.qr-code-image {
+    display: block;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+.qr-scanning-tips {
+    padding: calc(var(--spacing-unit) * 1.5);
+    width: 100%;
+    max-width: 570px;
+    text-align: left;
+}
+
+.qr-tips-title {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: rgb(var(--highlight-color-rgb), 0.5);
+}
+
+.qr-tips-content {
+    font-size: 0.85rem;
+    color: rgb(var(--text-muted-rgb), 1);
+    line-height: 1.4;
+}
+
+.qr-close-button {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+    color: var(--text-color);
+}
+
+/* QR Error Modal Styles */
+.qr-error-container {
+    text-align: center;
+    padding: 1rem;
+}
+
+.qr-error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.qr-error-message {
+    color: rgb(var(--text-muted-rgb), 1);
+    margin-bottom: 1.5rem;
+}
+
+.qr-error-data {
+    text-align: left;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    background: rgb(var(--card-bg-rgb), 0.1);
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid rgb(var(--border-color-rgb), 0.5);
+}
+
+.qr-error-details {
+    font-size: 0.8rem;
+    color: rgb(var(--status-unsealed-color-rgb), 0.5);
+    margin-top: 1rem;
+}
+
+/**
+ * Ulepszony arkusz stylów do druku
+ * Wersja: 2.5
+ * * Główne zmiany:
+ * - Zmieniono `table-layout` na `auto` i usunięto stałe szerokości kolumn, aby dopasowywały się do zawartości.
+ * - Usunięto ograniczenie wysokości dla kolumny "Notatki", aby dopasowywała się dynamicznie do zawartości.
+ * - Naprawiono błąd wyświetlania obramowania w kolumnie "Notatki" poprzez przeniesienie stylu obramowania z komórek (td) na wiersze (tr).
+ * - Usunięto zewnętrzne obramowanie tabeli, pozostawiając tylko wewnętrzne linie.
+ * - Uproszczono wygląd, usuwając zaokrąglenia rogów.
+ * - Zmniejszono grubość kolorowego obramowania kolumn dla subtelniejszego efektu.
+ * - Zoptymalizowano style wydruku, aby były bardziej minimalistyczne i czytelne.
+ */
+
+/* --- Główne style dokumentu --- */
+.print-document {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    margin: 0;
+    padding: 1cm;
+    font-size: 10pt;
+    line-height: 1.4;
+    background: #ffffff;
+    color: #34495e;
+}
+
+/* --- Tytuły --- */
+.print-title {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+.print-subtitle {
+    text-align: center;
+    font-size: 1rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: #7f8c8d;
+    font-weight: 500;
+    font-style: italic;
+}
+
+/* --- Główna tabela --- */
+.print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    page-break-inside: avoid;
+    font-size: 0.9rem;
+    table-layout: auto;
+    /* Zmieniono na auto, aby kolumny dopasowywały się do treści */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.print-table thead {
+    display: table-header-group;
+}
+
+.print-table th {
+    background-color: #34495e;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 12px 10px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.print-table tr {
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.print-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.print-table td {
+    padding: 10px;
+    text-align: left;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-wrap: break-word;
+    vertical-align: top;
+    color: #2c3e50;
+    border-left: 1px solid transparent;
+    /* border-bottom usunięty - teraz jest na <tr> */
+}
+
+/* Kolory wierszy dla lepszej czytelności */
+.print-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.print-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* --- Style dla poszczególnych kolumn (subtelne obramowanie) --- */
+.print-table td {
+    border-left: 1px solid transparent;
+    /* Zmniejszona grubość ramki */
+    /* Domyślne przezroczyste obramowanie */
+}
+
+.print-table td:nth-child(1) {
+    /* Location */
+    font-weight: 600;
+    border-left-color: #e74c3c !important;
+}
+
+.print-table td:nth-child(2) {
+    /* Type */
+    font-weight: 600;
+    border-left-color: #27ae60 !important;
+}
+
+.print-table td:nth-child(3) {
+    /* Time in Yard */
+    font-weight: 600;
+    border-left-color: #f39c12 !important;
+}
+
+.print-table td:nth-child(4) {
+    /* Vehicle ID */
+    font-weight: 700;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    border-left-color: #3498db !important;
+}
+
+.print-table td:nth-child(5) {
+    /* Notes */
+    color: #667884;
+    /* Ciemniejszy kolor dla lepszej czytelności */
+    font-style: normal;
+    /* Usunięto kursywę dla lepszej czytelności */
+    border-left-color: #95a5a6;
+    background-color: rgba(149, 165, 166, 0.05);
+    /* Subtelne tło dla wyróżnienia */
+    hyphens: auto;
+}
+
+/* --- Skrzynka podsumowania --- */
+.print-summary-box {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid #0000001e;
+    background-color: #f8f9fa;
+    page-break-inside: avoid;
+}
+
+.print-summary-box h3 {
+    margin: 0 0 0.8rem 0;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    text-align: center;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-bottom: 1px solid #0000001e;
+    padding-bottom: 0.5rem;
+}
+
+.print-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.print-summary-item {
+    text-align: center;
+    padding: 0.8rem;
+    background-color: #ffffff;
+    border: 1px solid #ecf0f1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.print-summary-label {
+    font-size: 0.7rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+.print-summary-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.print-summary-total {
+    color: #e74c3c;
+    font-size: 1.7rem;
+}
+
+/* --- Stopka z datą --- */
+.print-date {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: #95a5a6;
+    border-top: 1px solid #0000001e;
+    padding-top: 0.5rem;
+    font-style: italic;
+}
+
+/* --- Ustawienia strony do druku --- */
+@page {
+    size: A4 landscape;
+    margin: 0.1cm;
+    /* Zmniejszony margines strony */
+}
+
+/* ======================================================= */
+/* ========= STYLE DLA WYDRUKU (1 STRONA A4) ============= */
+/* ======================================================= */
+@media print {
+    .print-document {
+        padding: 0.5cm 0.7cm;
+        font-size: 8.5pt;
+        /* Zmniejszona bazowa czcionka */
+        box-shadow: none;
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .print-title {
+        font-size: 1.2rem;
+        margin-bottom: 0.3rem;
+        padding-bottom: 0.3rem;
+        color: #000000 !important;
+        border-color: #0000001e !important;
+    }
+
+    .print-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        color: #555555 !important;
+    }
+
+    .print-table {
+        margin: 0.5rem 0;
+    }
+
+    .print-table, .print-summary-box {
+        box-shadow: none !important;
+
+    }
+
+    /* Przywrócenie ramki dla samego podsumowania w druku */
+    .print-summary-box {
+        border: 1px solid #0000001e;
+    }
+
+    .print-table th {
+        background: #dddddd !important;
+        color: #000000 !important;
+        font-size: 0.75rem;
+        /* Zmniejszona czcionka nagłówka */
+        padding: 5px;
+        /* Zmniejszony padding */
+        border: none !important;
+        border-bottom: 1px solid #0000001e !important;
+        border-left: 1px solid transparent !important;
+    }
+
+    .print-table tbody tr {
+        border-bottom: 1px solid #0000001e !important;
+    }
+
+    .print-table td {
+        font-size: 0.7rem;
+        /* Zmniejszona czcionka komórek */
+        padding: 4px 6px;
+        /* Zmniejszony padding */
+        line-height: 1.2;
+        border: none !important;
+        color: #000000 !important;
+        border-left: 1px solid transparent !important;
+    }
+
+    .print-table tbody tr:last-child {
+        border-bottom: none !important;
+    }
+
+    .print-table td {
+        border-left: none !important;
+    }
+
+    .print-table tbody tr:nth-child(even) {
+        background-color: #f2f2f2 !important;
+    }
+
+    .print-summary-box {
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        /* Zmniejszony padding */
+        background: #f5f5f5 !important;
+    }
+
+    .print-summary-box h3 {
+        font-size: 0.9rem;
+        margin-bottom: 0.4rem;
+        color: #000000 !important;
+    }
+
+    .print-summary-grid {
+        gap: 0.5rem;
+    }
+
+    .print-summary-item {
+        padding: 0.4rem;
+    }
+
+    .print-summary-label {
+        font-size: 0.65rem;
+        color: #555555 !important;
+    }
+
+    .print-summary-number {
+        font-size: 1.2rem;
+    }
+
+    .print-summary-total {
+        font-size: 1.3rem;
+    }
+}
+
+/* Usunięto stałe szerokości kolumn */
